@@ -1,5 +1,7 @@
 <div *ngIf="isLoggedIn()">
   <div class="container">Hi and welcome!</div>
+  <div class="container">Name: {{ ($userInfo | async)?.info.name }}</div>
+  <div class="container"><img src="{{ ($userInfo | async)?.info.picture }}"></div>
   <div class="container">
     <button (click)="logout()">Logout from Google</button>
   </div>

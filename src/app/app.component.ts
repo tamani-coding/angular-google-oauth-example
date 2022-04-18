@@ -1,5 +1,15 @@
-import { OAuthService } from 'angular-oauth2-oidc';
+import { filter } from 'rxjs';
 import { Component } from '@angular/core';
+import { OAuthService } from 'angular-oauth2-oidc';
+import { GoogleApiService } from './google-api.service';
+
+export interface UserInfo {
+  info: {
+    email: string,
+    name: string,
+    picture: string
+  }
+}
 
 @Component({
   selector: 'app-root',
@@ -9,8 +19,18 @@ import { Component } from '@angular/core';
 export class AppComponent {
   title = 'angular-google-oauth-example';
 
-  constructor(private readonly oAuthService: OAuthService) {
+  $userInfo?: Promise<any>
 
+  constructor(
+    private readonly oAuthService: OAuthService,
+    private readonly googleApi: GoogleApiService) {
+      oAuthService.events
+      .pipe(filter(e => ['discovery_document_loaded'].includes(e.type)))
+      .subscribe(e => {
+        // getting user profile
+        console.log('getting user profile')
+        this.$userInfo = oAuthService.loadUserProfile()
+      });
   }
 
   isLoggedIn(): boolean {
@@ -20,4 +40,5 @@ export class AppComponent {
   logout() {
     this.oAuthService.logOut()
   }
+
 }
