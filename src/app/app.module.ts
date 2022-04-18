@@ -20,9 +20,6 @@ const authCodeFlowConfig: AuthConfig = {
   clientId: '<your-client-id>',
 
   // set the scope for the permissions the client should request
-  // The first four are defined by OIDC.
-  // Important: Request offline_access to get a refresh token
-  // The api scope is a usecase specific one
   scope: 'openid profile email https://www.googleapis.com/auth/gmail.readonly',
 
   showDebugInformation: true,
