@@ -19,17 +19,13 @@ export interface UserInfo {
 export class AppComponent {
   title = 'angular-google-oauth-example';
 
-  $userInfo?: Promise<any>
+  $userInfo?: Promise<UserInfo>
 
-  constructor(
-    private readonly oAuthService: OAuthService,
-    private readonly googleApi: GoogleApiService) {
-      oAuthService.events
-      .pipe(filter(e => ['discovery_document_loaded'].includes(e.type)))
+  constructor(private readonly oAuthService: OAuthService, private readonly googleApi: GoogleApiService) {
+    oAuthService.events.pipe(filter(e => ['discovery_document_loaded'].includes(e.type)))
       .subscribe(e => {
         // getting user profile
-        console.log('getting user profile')
-        this.$userInfo = oAuthService.loadUserProfile()
+        this.$userInfo = oAuthService.loadUserProfile() as Promise<UserInfo>
       });
   }
 
@@ -40,5 +36,4 @@ export class AppComponent {
   logout() {
     this.oAuthService.logOut()
   }
-
 }
