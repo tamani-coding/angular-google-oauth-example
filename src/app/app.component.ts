@@ -1,10 +1,11 @@
-import { filter } from 'rxjs';
+import { filter, lastValueFrom } from 'rxjs';
 import { Component } from '@angular/core';
 import { OAuthService } from 'angular-oauth2-oidc';
 import { GoogleApiService } from './google-api.service';
 
 export interface UserInfo {
   info: {
+    sub: string
     email: string,
     name: string,
     picture: string
@@ -20,6 +21,7 @@ export class AppComponent {
   title = 'angular-google-oauth-example';
 
   $userInfo?: Promise<UserInfo>
+  mailSnippets: string[] = []
 
   constructor(private readonly oAuthService: OAuthService, private readonly googleApi: GoogleApiService) {
     oAuthService.events.pipe(filter(e => ['discovery_document_loaded'].includes(e.type)))
@@ -35,5 +37,16 @@ export class AppComponent {
 
   logout() {
     this.oAuthService.logOut()
+  }
+
+  async getEmails() {
+    const userId = (await this.$userInfo)?.info.sub as string
+    const messages = await lastValueFrom(this.googleApi.emails(userId))
+    messages.messages.forEach( (element: any) => {
+      const mail = lastValueFrom(this.googleApi.getMail(userId, element.id))
+      mail.then( mail => {
+        this.mailSnippets.push(mail.snippet)
+      })
+    });
   }
 }

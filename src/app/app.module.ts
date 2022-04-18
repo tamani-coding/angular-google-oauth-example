@@ -1,8 +1,9 @@
-import { HttpClientModule } from '@angular/common/http';
+import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { APP_INITIALIZER, NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { AuthConfig, OAuthModule, OAuthService } from 'angular-oauth2-oidc';
 import { AppComponent } from './app.component';
+import { TokenInterceptor } from './token.interceptor';
 
 const authCodeFlowConfig: AuthConfig = {
   // Url of the Identity Provider
@@ -16,13 +17,13 @@ const authCodeFlowConfig: AuthConfig = {
 
   // The SPA's id. The SPA is registerd with this id at the auth-server
   // clientId: 'server.code',
-  clientId: '194103401533-vv917ah9dt5l01u8o6da8f3sp3qir5ao.apps.googleusercontent.com',
+  clientId: '<your-client-id>',
 
   // set the scope for the permissions the client should request
   // The first four are defined by OIDC.
   // Important: Request offline_access to get a refresh token
   // The api scope is a usecase specific one
-  scope: 'openid profile email',
+  scope: 'openid profile email https://www.googleapis.com/auth/gmail.readonly',
 
   showDebugInformation: true,
 };
@@ -64,11 +65,11 @@ function initializeApp(oAuthService: OAuthService): Promise<void> {
     useFactory: initializeApp,
     deps: [OAuthService]
   },
-  // {
-  //   provide: HTTP_INTERCEPTORS,
-  //   useClass: TokenInterceptor,
-  //   multi: true
-  // }
+  {
+    provide: HTTP_INTERCEPTORS,
+    useClass: TokenInterceptor,
+    multi: true
+  }
 ],
   bootstrap: [AppComponent]
 })
