@@ -1,16 +1,6 @@
-import { filter, lastValueFrom } from 'rxjs';
 import { Component } from '@angular/core';
-import { OAuthService } from 'angular-oauth2-oidc';
-import { GoogleApiService } from './google-api.service';
-
-export interface UserInfo {
-  info: {
-    sub: string
-    email: string,
-    name: string,
-    picture: string
-  }
-}
+import { Observable, lastValueFrom } from 'rxjs';
+import { GoogleApiService, UserInfo } from './google-api.service';
 
 @Component({
   selector: 'app-root',
@@ -20,27 +10,32 @@ export interface UserInfo {
 export class AppComponent {
   title = 'angular-google-oauth-example';
 
-  $userInfo?: Promise<UserInfo>
   mailSnippets: string[] = []
+  userInfo?: UserInfo
 
-  constructor(private readonly oAuthService: OAuthService, private readonly googleApi: GoogleApiService) {
-    oAuthService.events.pipe(filter(e => ['discovery_document_loaded'].includes(e.type)))
-      .subscribe(e => {
-        // getting user profile
-        this.$userInfo = oAuthService.loadUserProfile() as Promise<UserInfo>
-      });
+  constructor(private readonly googleApi: GoogleApiService) {
+    googleApi.userProfileSubject.subscribe( info => {
+      this.userInfo = info
+    })
   }
 
   isLoggedIn(): boolean {
-    return this.oAuthService.hasValidAccessToken()
+    return this.googleApi.isLoggedIn()
   }
 
   logout() {
-    this.oAuthService.logOut()
+    this.googleApi.signOut()
   }
 
   async getEmails() {
-    const userId = (await this.$userInfo)?.info.sub as string
+    if (!this.userInfo) {
+      return;
+    }
+
+    console.log('before last value')
+    const userId = this.userInfo?.info.sub as string
+    console.log('before after value')
+
     const messages = await lastValueFrom(this.googleApi.emails(userId))
     messages.messages.forEach( (element: any) => {
       const mail = lastValueFrom(this.googleApi.getMail(userId, element.id))
