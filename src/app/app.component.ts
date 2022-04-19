@@ -32,7 +32,7 @@ export class AppComponent {
   }
 
   isLoggedIn(): boolean {
-    return this.oAuthService.getAccessToken() != undefined
+    return this.oAuthService.hasValidAccessToken()
   }
 
   logout() {

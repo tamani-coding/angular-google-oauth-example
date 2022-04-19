@@ -38,7 +38,7 @@ function initializeApp(oAuthService: OAuthService): Promise<void> {
     // // It doesn't send the user the the login page
     oAuthService.tryLoginImplicitFlow();
 
-    if (!oAuthService.getAccessToken()) {
+    if (!oAuthService.hasValidAccessToken()) {
       oAuthService.initLoginFlow()
     }
 
