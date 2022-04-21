@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { Observable, lastValueFrom } from 'rxjs';
+import { lastValueFrom } from 'rxjs';
 import { GoogleApiService, UserInfo } from './google-api.service';
 
 @Component({
@@ -32,10 +32,7 @@ export class AppComponent {
       return;
     }
 
-    console.log('before last value')
     const userId = this.userInfo?.info.sub as string
-    console.log('before after value')
-
     const messages = await lastValueFrom(this.googleApi.emails(userId))
     messages.messages.forEach( (element: any) => {
       const mail = lastValueFrom(this.googleApi.getMail(userId, element.id))

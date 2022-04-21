@@ -1,7 +1,7 @@
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Injectable } from '@angular/core';
 import { AuthConfig, OAuthService } from 'angular-oauth2-oidc';
 import { Observable, Subject } from 'rxjs';
-import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
 
 const authCodeFlowConfig: AuthConfig = {
   // Url of the Identity Provider
@@ -44,7 +44,7 @@ export class GoogleApiService {
   constructor(private readonly oAuthService: OAuthService, private readonly httpClient: HttpClient) {
     // confiure oauth2 service
     oAuthService.configure(authCodeFlowConfig);
-
+    // manually configure a logout url, because googles discovery document does not provide it
     oAuthService.logoutUrl = "https://www.google.com/accounts/Logout";
 
     // loading the discovery document from google, which contains all relevant URL for
@@ -70,11 +70,11 @@ export class GoogleApiService {
   }
 
   emails(userId: string): Observable<any> {
-    return this.httpClient.get(`${this.gmail}/gmail/v1/users/${userId}/messages`)
+    return this.httpClient.get(`${this.gmail}/gmail/v1/users/${userId}/messages`, { headers: this.authHeader() })
   }
 
   getMail(userId: string, mailId: string): Observable<any> {
-    return this.httpClient.get(`${this.gmail}/gmail/v1/users/${userId}/messages/${mailId}`)
+    return this.httpClient.get(`${this.gmail}/gmail/v1/users/${userId}/messages/${mailId}`, { headers: this.authHeader() })
   }
 
   isLoggedIn(): boolean {
@@ -83,5 +83,11 @@ export class GoogleApiService {
 
   signOut() {
     this.oAuthService.logOut()
+  }
+
+  private authHeader() : HttpHeaders {
+    return new HttpHeaders ({
+      'Authorization': `Bearer ${this.oAuthService.getAccessToken()}`
+    })
   }
 }
